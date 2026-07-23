@@ -2,72 +2,67 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Day View</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Day View - Lesson Planner</title>
+
   <link rel="stylesheet" href="styles.css">
-  <style>
-    .lesson-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      margin-bottom: 8px;
-    }
-
-    .lesson-item span {
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .picker-btn {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      background: #fff;
-      cursor: pointer;
-      font-size: 14px;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-
-    .picker-btn:hover {
-      background: #f5f7ff;
-      border-color: #3b5bdb;
-    }
-
-    .picker-btn.added {
-      opacity: 0.45;
-      cursor: default;
-    }
-
-    .picker-btn.added:hover {
-      background: #fff;
-      border-color: #e0e0e0;
-    }
-
-    .picker-tag {
-      font-size: 11px;
-      color: #888;
-    }
-  </style>
 </head>
+
 <body>
 
-  <a class="back-link" href="calendar.html">← Back to calendar</a>
+<div class="page">
 
-  <h1 id="date-title"></h1>
+  <!-- Navigation back to the main parts of the application -->
+  <nav class="main-nav">
+    <a href="calendar.html" class="nav-link">Calendar</a>
+    <a href="lesson-library.html" class="nav-link">Lesson Library</a>
+    <a href="lesson-creator.html" class="nav-link">Create Lesson</a>
+  </nav>
 
-  <h2>Lessons for this day</h2>
-  <div id="day-lessons"></div>
+  <a href="calendar.html" class="back-link">
+    ← Back to Calendar
+  </a>
 
-  <h2>Add a lesson</h2>
-  <div id="lesson-picker"></div>
+  <div class="day-header">
 
-  <script src="day-view.js"></script>
+    <div>
+      <h1 id="date-title">Day Schedule</h1>
+    </div>
+
+    <div id="day-status" class="day-status">
+      School day
+    </div>
+
+  </div>
+
+  <section>
+
+    <h2>Daily Schedule</h2>
+
+    <p>
+      Drag lessons up or down to change the order they appear during the day.
+    </p>
+
+    <div id="schedule-board" class="schedule-board"></div>
+
+  </section>
+
+  <section class="add-lesson-box">
+
+    <h2>Add a Lesson</h2>
+
+    <p>
+      Select a lesson from your lesson library to add it to this day's schedule.
+    </p>
+
+    <div id="lesson-options"></div>
+
+  </section>
+
+</div>
+
+<script src="day-view.js"></script>
+
 </body>
 </html>

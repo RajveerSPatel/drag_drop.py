@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Calendar - Lesson Planner</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="page">
+
+  <!-- Main navigation stays the same on every page -->
+  <nav class="main-nav">
+    <a href="calendar.html" class="nav-link active">Calendar</a>
+    <a href="lesson-library.html" class="nav-link">Lesson Library</a>
+    <a href="lesson-creator.html" class="nav-link">Create Lesson</a>
+  </nav>
+
+  <!-- Calendar controls -->
+  <div class="cal-toolbar">
+
+    <div class="view-buttons">
+      <button id="view-month" class="view-btn active">Month</button>
+      <button id="view-term" class="view-btn">Term</button>
+      <button id="view-year" class="view-btn">Year</button>
+    </div>
+
+    <div class="calendar-navigation">
+      <button id="prev">←</button>
+
+      <span id="nav-title"></span>
+
+      <button id="next">→</button>
+
+      <button id="go-today">Today</button>
+    </div>
+
+  </div>
+
+  <!-- Calendar legend -->
+  <div class="calendar-legend">
+
+    <span>
+      <span class="legend-box legend-school"></span>
+      School holiday
+    </span>
+
+    <span>
+      <span class="legend-box legend-public"></span>
+      Public holiday
+    </span>
+
+    <span>
+      <span class="legend-box legend-lesson"></span>
+      Lesson
+    </span>
+
+  </div>
+
+  <!-- MONTH VIEW -->
+  <div id="month-view">
+
+    <div id="weekday-row">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thu</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+
+    <div id="calendar-grid"></div>
+
+  </div>
+
+  <!-- TERM VIEW -->
+  <div id="term-grid"></div>
+
+  <!-- YEAR VIEW -->
+  <div id="year-grid"></div>
+
+</div>
+
+<script src="calendar.js"></script>
+
+</body>
+</html>

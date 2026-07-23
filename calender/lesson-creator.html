@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Create Lesson - Lesson Planner</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="page">
+
+  <nav class="main-nav">
+    <a href="calendar.html" class="nav-link">Calendar</a>
+    <a href="lesson-library.html" class="nav-link">Lesson Library</a>
+    <a href="lesson-creator.html" class="nav-link active">Create Lesson</a>
+  </nav>
+
+  <div class="form-container">
+
+    <div class="page-header">
+      <div>
+        <h1 id="form-title">Create Lesson</h1>
+        <p>Create a lesson that can later be added to a day.</p>
+      </div>
+    </div>
+
+    <form id="lesson-form">
+
+      <div class="form-group">
+        <label for="title">
+          Lesson title
+        </label>
+
+        <input
+          id="title"
+          type="text"
+          required
+          placeholder="e.g. Introduction to Fractions"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="subject">
+          Subject
+        </label>
+
+        <input
+          id="subject"
+          type="text"
+          placeholder="e.g. Mathematics"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="year">
+          Year level
+        </label>
+
+        <select id="year">
+          <option value="">Select year</option>
+          <option value="7">Year 7</option>
+          <option value="8">Year 8</option>
+          <option value="9">Year 9</option>
+          <option value="10">Year 10</option>
+          <option value="11">Year 11</option>
+          <option value="12">Year 12</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="duration">
+          Duration
+        </label>
+
+        <input
+          id="duration"
+          type="text"
+          placeholder="e.g. 60 minutes"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="type">
+          Lesson type
+        </label>
+
+        <select id="type">
+          <option value="">Select type</option>
+          <option value="Theory">Theory</option>
+          <option value="Practical">Practical</option>
+          <option value="Assessment">Assessment</option>
+          <option value="Revision">Revision</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="description">
+          Description
+        </label>
+
+        <textarea
+          id="description"
+          placeholder="Describe what students will learn..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="notes">
+          Teacher notes
+        </label>
+
+        <textarea
+          id="notes"
+          placeholder="Add any notes for yourself..."
+        ></textarea>
+      </div>
+
+      <div class="form-actions">
+
+        <button
+          type="submit"
+          class="primary"
+        >
+          Save Lesson
+        </button>
+
+        <a href="calendar.html">
+          <button
+            type="button"
+          >
+            Cancel
+          </button>
+        </a>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+<script src="lesson-creator.js"></script>
+
+</body>
+</html>

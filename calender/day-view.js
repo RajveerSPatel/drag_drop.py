@@ -1,159 +1,351 @@
-// get the date from the URL
+/*
+  Day View
+
+  This page receives a date from the calendar using:
+  day-view.html?date=YYYY-MM-DD
+
+  Lessons are stored in localStorage so the calendar,
+  lesson library and day view all use the same information.
+*/
+
 const params = new URLSearchParams(window.location.search);
-const selectedDate = params.get("date");
 
-// if theres no date redirect back to calendar
-if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
-  document.body.innerHTML = "<p>No date selected, redirecting...</p>";
-  setTimeout(function() {
-    window.location.href = "calendar.html";
-  }, 1500);
-  throw new Error("no date");
+let selectedDate = params.get("date");
+
+if (!selectedDate) {
+  selectedDate = new Date().toISOString().split("T")[0];
 }
 
-// show the date nicely
-const parts = selectedDate.split("-");
-const year = parseInt(parts[0]);
-const month = parseInt(parts[1]) - 1;
-const day = parseInt(parts[2]);
-const dateObj = new Date(year, month, day);
-document.getElementById("date-title").textContent = dateObj.toLocaleDateString("default", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric"
-});
+/* ---------------------------------------------------------
+   DATA HELPERS
+   --------------------------------------------------------- */
 
-// read from localStorage safely
-function getJSON(key) {
+function getLessons() {
   try {
-    return JSON.parse(localStorage.getItem(key)) || {};
-  } catch (e) {
-    return {};
-  }
-}
-
-function getArray(key) {
-  try {
-    return JSON.parse(localStorage.getItem(key)) || [];
-  } catch (e) {
+    return JSON.parse(localStorage.getItem("lessons")) || [];
+  } catch {
     return [];
   }
 }
 
-function saveJSON(key, value) {
+function getSchedule() {
   try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch (e) {
-    console.error("cant save:", e);
+    return JSON.parse(localStorage.getItem("schedule")) || {};
+  } catch {
+    return {};
   }
 }
 
-const lessons = getArray("lessons");
-const schedule = getJSON("schedule");
+function saveSchedule(schedule) {
+  localStorage.setItem("schedule", JSON.stringify(schedule));
+}
 
-let todaysLessons = (schedule[selectedDate] || []).map(String);
+function getYearClass(year) {
+  const cleanYear = String(year || "").replace(/\D/g, "");
 
-// SHOW LESSONS FOR THIS DAY
-function showDayLessons() {
-  const container = document.getElementById("day-lessons");
-  container.innerHTML = "";
-
-  if (todaysLessons.length === 0) {
-    container.innerHTML = '<p class="empty-msg">Nothing scheduled yet — add a lesson below!</p>';
-    return;
+  if (["7", "8", "9", "10", "11", "12"].includes(cleanYear)) {
+    return `year-${cleanYear}`;
   }
 
-  for (let i = 0; i < todaysLessons.length; i++) {
-    const lessonId = todaysLessons[i];
-    const lesson = lessons.find(function(l) {
-      return String(l.id) === lessonId;
-    });
+  return "year-other";
+}
 
-    if (!lesson) continue;
+/* ---------------------------------------------------------
+   DATE INFORMATION
+   --------------------------------------------------------- */
+
+function formatDate(dateString) {
+  const date = new Date(dateString + "T00:00:00");
+
+  return date.toLocaleDateString("en-AU", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+/* ---------------------------------------------------------
+   RENDER THE DAY
+   --------------------------------------------------------- */
+
+function renderDay() {
+  document.getElementById("date-title").textContent =
+    formatDate(selectedDate);
+
+  const lessons = getLessons();
+  const schedule = getSchedule();
+
+  const lessonIds = schedule[selectedDate] || [];
+
+  const board = document.getElementById("schedule-board");
+
+  board.innerHTML = "";
+
+  if (lessonIds.length === 0) {
+    board.innerHTML = `
+      <div class="empty-state">
+        No lessons have been added to this day yet.
+      </div>
+    `;
+  }
+
+  lessonIds.forEach((lessonId, index) => {
+
+    const lesson = lessons.find(
+      item => String(item.id) === String(lessonId)
+    );
+
+    if (!lesson) return;
 
     const item = document.createElement("div");
-    item.className = "lesson-item";
 
-    const title = document.createElement("span");
-    title.textContent = lesson.title;
+    item.className =
+      `schedule-item ${getYearClass(lesson.year)}`;
 
-    const removeBtn = document.createElement("button");
-    removeBtn.className = "btn-remove";
-    removeBtn.textContent = "×";
-    removeBtn.title = "Remove from this day";
-    removeBtn.onclick = function() {
-      removeLesson(lessonId);
-    };
+    item.draggable = true;
 
-    item.appendChild(title);
-    item.appendChild(removeBtn);
-    container.appendChild(item);
-  }
-}
+    item.dataset.index = index;
 
-// ADD / REMOVE LESSONS
-function addLesson(id) {
-  if (todaysLessons.indexOf(id) !== -1) return;
-  todaysLessons.push(id);
-  save();
-  showDayLessons();
-  showLessonPicker();
-}
+    item.innerHTML = `
+      <div class="drag-handle">☰</div>
 
-function removeLesson(id) {
-  todaysLessons = todaysLessons.filter(function(x) {
-    return x !== id;
+      <div class="schedule-content">
+        <div class="schedule-title">
+          ${escapeHTML(lesson.title)}
+        </div>
+
+        <div class="schedule-meta">
+          Year ${escapeHTML(lesson.year || "Other")}
+          ${lesson.subject ? " • " + escapeHTML(lesson.subject) : ""}
+          ${lesson.duration ? " • " + escapeHTML(lesson.duration) : ""}
+        </div>
+      </div>
+
+      <button class="remove-lesson" data-id="${lesson.id}">
+        Remove
+      </button>
+    `;
+
+    /* Remove button */
+    item
+      .querySelector(".remove-lesson")
+      .addEventListener("click", event => {
+        event.stopPropagation();
+        removeLesson(lesson.id);
+      });
+
+    /* Start dragging */
+    item.addEventListener("dragstart", () => {
+      item.classList.add("dragging");
+    });
+
+    item.addEventListener("dragend", () => {
+      item.classList.remove("dragging");
+    });
+
+    board.appendChild(item);
   });
-  save();
-  showDayLessons();
-  showLessonPicker();
+
+  setupDragAndDrop();
+
+  renderLessonOptions();
 }
 
-function save() {
-  schedule[selectedDate] = todaysLessons;
-  saveJSON("schedule", schedule);
+/* ---------------------------------------------------------
+   DRAG AND DROP
+   --------------------------------------------------------- */
+
+function setupDragAndDrop() {
+  const board = document.getElementById("schedule-board");
+
+  board.addEventListener("dragover", event => {
+    event.preventDefault();
+
+    const dragging = board.querySelector(".dragging");
+
+    if (!dragging) return;
+
+    const afterElement = getDragAfterElement(
+      board,
+      event.clientY
+    );
+
+    if (!afterElement) {
+      board.appendChild(dragging);
+    } else {
+      board.insertBefore(dragging, afterElement);
+    }
+  });
+
+  board.addEventListener("drop", () => {
+    saveNewOrder();
+  });
 }
 
-// LESSON PICKER
-function showLessonPicker() {
-  const picker = document.getElementById("lesson-picker");
-  picker.innerHTML = "";
+function getDragAfterElement(container, y) {
+  const elements = [
+    ...container.querySelectorAll(
+      ".schedule-item:not(.dragging)"
+    )
+  ];
+
+  return elements.reduce(
+    (closest, child) => {
+
+      const box = child.getBoundingClientRect();
+
+      const offset =
+        y - box.top - box.height / 2;
+
+      if (offset < 0 && offset > closest.offset) {
+        return {
+          offset,
+          element: child
+        };
+      }
+
+      return closest;
+
+    },
+    {
+      offset: Number.NEGATIVE_INFINITY,
+      element: null
+    }
+  ).element;
+}
+
+function saveNewOrder() {
+  const schedule = getSchedule();
+
+  const items = [
+    ...document.querySelectorAll(".schedule-item")
+  ];
+
+  schedule[selectedDate] = items.map(
+    item => {
+      const title = item.querySelector(".remove-lesson");
+
+      return title.dataset.id;
+    }
+  );
+
+  saveSchedule(schedule);
+}
+
+/* ---------------------------------------------------------
+   ADD AND REMOVE LESSONS
+   --------------------------------------------------------- */
+
+function addLesson(lessonId) {
+  const schedule = getSchedule();
+
+  if (!schedule[selectedDate]) {
+    schedule[selectedDate] = [];
+  }
+
+  if (
+    !schedule[selectedDate].some(
+      id => String(id) === String(lessonId)
+    )
+  ) {
+    schedule[selectedDate].push(lessonId);
+  }
+
+  saveSchedule(schedule);
+
+  renderDay();
+}
+
+function removeLesson(lessonId) {
+  const schedule = getSchedule();
+
+  if (!schedule[selectedDate]) return;
+
+  schedule[selectedDate] =
+    schedule[selectedDate].filter(
+      id => String(id) !== String(lessonId)
+    );
+
+  saveSchedule(schedule);
+
+  renderDay();
+}
+
+function renderLessonOptions() {
+  const container =
+    document.getElementById("lesson-options");
+
+  const lessons = getLessons();
+
+  const schedule = getSchedule();
+
+  const currentIds =
+    schedule[selectedDate] || [];
+
+  container.innerHTML = "";
 
   if (lessons.length === 0) {
-    picker.innerHTML = '<p class="empty-msg">No lessons in your library yet. <a href="lesson-library.html">Create some first!</a></p>';
+    container.innerHTML = `
+      <div class="empty-state">
+        You don't have any lessons yet.
+        <br><br>
+        Create a lesson in the Lesson Creator first.
+      </div>
+    `;
+
     return;
   }
 
-  for (let i = 0; i < lessons.length; i++) {
-    const lesson = lessons[i];
-    const alreadyAdded = todaysLessons.indexOf(String(lesson.id)) !== -1;
+  lessons.forEach(lesson => {
 
-    const btn = document.createElement("button");
-    btn.className = "picker-btn";
-    if (alreadyAdded) btn.classList.add("added");
-    btn.disabled = alreadyAdded;
+    const alreadyAdded =
+      currentIds.some(
+        id => String(id) === String(lesson.id)
+      );
 
-    const titleSpan = document.createElement("span");
-    titleSpan.textContent = lesson.title;
+    const option =
+      document.createElement("div");
 
-    const tag = document.createElement("span");
-    tag.className = "picker-tag";
-    tag.textContent = alreadyAdded ? "Added ✓" : "Add";
+    option.className = "lesson-option";
 
-    btn.appendChild(titleSpan);
-    btn.appendChild(tag);
+    option.innerHTML = `
+      <div class="lesson-option-info">
+        <div class="lesson-option-title">
+          ${escapeHTML(lesson.title)}
+        </div>
+
+        <div class="lesson-option-meta">
+          Year ${escapeHTML(lesson.year || "Other")}
+          ${lesson.subject ? " • " + escapeHTML(lesson.subject) : ""}
+        </div>
+      </div>
+
+      <button ${alreadyAdded ? "disabled" : ""}>
+        ${alreadyAdded ? "Added" : "Add"}
+      </button>
+    `;
 
     if (!alreadyAdded) {
-      btn.onclick = function() {
-        addLesson(String(lesson.id));
-      };
+      option
+        .querySelector("button")
+        .addEventListener("click", () => {
+          addLesson(lesson.id);
+        });
     }
 
-    picker.appendChild(btn);
-  }
+    container.appendChild(option);
+  });
 }
 
-// load everything
-showDayLessons();
-showLessonPicker();
+/* Small helper to safely display user-entered text */
+function escapeHTML(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+document.addEventListener("DOMContentLoaded", renderDay);

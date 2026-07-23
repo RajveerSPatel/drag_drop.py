@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Lesson Library - Lesson Planner</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div class="page">
+
+  <nav class="main-nav">
+    <a href="calendar.html" class="nav-link">Calendar</a>
+    <a href="lesson-library.html" class="nav-link active">Lesson Library</a>
+    <a href="lesson-creator.html" class="nav-link">Create Lesson</a>
+  </nav>
+
+  <div class="page-header">
+
+    <div>
+      <h1>Lesson Library</h1>
+      <p>Manage the lessons you can add to your calendar.</p>
+    </div>
+
+    <a href="lesson-creator.html">
+      <button class="primary">Create Lesson</button>
+    </a>
+
+  </div>
+
+  <input
+    type="text"
+    id="search"
+    class="search-bar"
+    placeholder="Search lessons..."
+  >
+
+  <div id="lesson-grid" class="lesson-grid"></div>
+
+</div>
+
+<script src="lesson-library.js"></script>
+
+</body>
+</html>
